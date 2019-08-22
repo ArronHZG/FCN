@@ -24,5 +24,4 @@ def fcnResNet50(in_channels=3, pretrained=True):
                  reduced by 16 times, and reduced by 32 times.
 
     '''
-    return ResNet(backbone='resnet50', in_channels=in_channels, output_stride=32, pretrained=pretrained)
-
+    return ResNet(backbone='resnet50', in_channels=in_channels, pretrained=pretrained)

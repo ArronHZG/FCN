@@ -5,7 +5,7 @@ from .utils import initialize_weights
 
 
 class ResNet(nn.Module):
-    def __init__(self, backbone='resnet101', in_channels=3, output_stride=16, pretrained=True,
+    def __init__(self, backbone='resnet101', in_channels=3, pretrained=True,
                  zero_init_residual=False):
         super(ResNet, self).__init__()
         model = getattr(torchvision_resnet, backbone)(pretrained)
@@ -24,29 +24,6 @@ class ResNet(nn.Module):
         self.layer2 = model.layer2
         self.layer3 = model.layer3
         self.layer4 = model.layer4
-
-        s3, s4, d3, d4 = [1] * 4
-        if output_stride == 16:
-            s3, s4, d3, d4 = (2, 1, 1, 2)
-        elif output_stride == 8:
-            s3, s4, d3, d4 = (1, 1, 2, 4)
-
-        if output_stride == 8:
-            for n, m in self.layer3.named_modules():
-                if 'conv1' in n and (backbone == 'resnet34' or backbone == 'resnet18'):
-                    m.dilation, m.padding, m.stride = (d3, d3), (d3, d3), (s3, s3)
-                elif 'conv2' in n:
-                    m.dilation, m.padding, m.stride = (d3, d3), (d3, d3), (s3, s3)
-                elif 'downsample.0' in n:
-                    m.stride = (s3, s3)
-
-        for n, m in self.layer4.named_modules():
-            if 'conv1' in n and (backbone == 'resnet34' or backbone == 'resnet18'):
-                m.dilation, m.padding, m.stride = (d4, d4), (d4, d4), (s4, s4)
-            elif 'conv2' in n:
-                m.dilation, m.padding, m.stride = (d4, d4), (d4, d4), (s4, s4)
-            elif 'downsample.0' in n:
-                m.stride = (s4, s4)
 
         # Zero-initialize the last BN in each residual branch,
         # so that the residual branch starts with zeros, and each residual block behaves like an identity.

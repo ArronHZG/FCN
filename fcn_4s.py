@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .models import getBackBone
+from models import getBackBone
 
 
 class FCNHead(nn.Sequential):
@@ -40,12 +40,12 @@ class FCNUpsampling(nn.Sequential):
 
 
 class FCN(nn.Module):
-    def __init__(self, backbone, num_classes, aux_classifier=None):
+    def __init__(self, backbone, num_classes, in_channels, pretrained, aux_classifier=None):
         super(FCN, self).__init__()
         # Using the modified resNet to get 4 different scales of the tensor,
         # in fact, the last three used in the paper,
         # first reserved for experiment
-        self.backbone = getBackBone(backbone)
+        self.backbone = getBackBone(backbone, in_channels, pretrained, )
         self.pool1_FCNHead = FCNHead(256, num_classes)
         self.pool2_FCNHead = FCNHead(512, num_classes)
         self.pool3_FCNHead = FCNHead(1024, num_classes)
@@ -107,8 +107,8 @@ class FCN(nn.Module):
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-            elif isinstance(m,nn.ConvTranspose2d):
-                m.weight = torch.nn.Parameter(self.bilinear_kernel(m.in_channels,m.out_channels,m.kernel_size[0]))
+            elif isinstance(m, nn.ConvTranspose2d):
+                m.weight = torch.nn.Parameter(self.bilinear_kernel(m.in_channels, m.out_channels, m.kernel_size[0]))
 
     def bilinear_kernel(self, in_channels, out_channels, kernel_size):
         factor = (kernel_size + 1) // 2
@@ -124,23 +124,20 @@ class FCN(nn.Module):
         return torch.from_numpy(weight)
 
 
-# if __name__ == '__main__':
-#     from models import getBackBone
-#
-#     m = getBackBone("fcnResNet50",3,False)
-#     print(m)
-#     x = torch.rand((1, 3, 256, 256))
-#     print(x.shape)
-#     a, b, c, d = m(x)
-#     print(a.shape)
-#     print(b.shape)
-#     print(c.shape)
-#     print(d.shape)
-#
-#
-#     m = FCN("fcnResNet50", num_classes=21)
-#     x = m(x)
-#     print(x['out'].size())
+if __name__ == '__main__':
+    x = torch.rand((1, 3, 256, 256))
 
+    m = getBackBone("fcnResNet50", 3, False)
+    print(m)
+    print(x.shape)
+    a, b, c, d = m(x)
+    print(a.shape)
+    print(b.shape)
+    print(c.shape)
+    print(d.shape)
 
-    # show_model(m,"fcnResNet50")
+    m = FCN("fcnResNet50", num_classes=21, in_channels=3, pretrained=False)
+    x = m(x)
+    print(x['out'].size())
+
+# show_model(m,"fcnResNet50")
