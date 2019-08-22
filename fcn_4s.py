@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from backbone import getBackBone
+from .models import getBackBone
 
 
 class FCNHead(nn.Sequential):
@@ -124,9 +124,23 @@ class FCN(nn.Module):
         return torch.from_numpy(weight)
 
 
-if __name__ == '__main__':
-    x = torch.rand((1, 3, 512, 512))
-    m = FCN("fcnResNet50", num_classes=21)
-    # print(m)
-    x = m(x)
-    print(x['out'].size())
+# if __name__ == '__main__':
+#     from models import getBackBone
+#
+#     m = getBackBone("fcnResNet50",3,False)
+#     print(m)
+#     x = torch.rand((1, 3, 256, 256))
+#     print(x.shape)
+#     a, b, c, d = m(x)
+#     print(a.shape)
+#     print(b.shape)
+#     print(c.shape)
+#     print(d.shape)
+#
+#
+#     m = FCN("fcnResNet50", num_classes=21)
+#     x = m(x)
+#     print(x['out'].size())
+
+
+    # show_model(m,"fcnResNet50")
